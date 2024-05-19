@@ -4,11 +4,16 @@ import numpy as np
 from memory_profiler import memory_usage
 import time
 
+import plotting
+
+
 def loss(X, y, w):
-    return np.sum((np.dot(X, w) - y) ** 2) / len(y)
+    return (np.sum((np.dot(X, w) - y) ** 2) / len(y))
+
 
 def gradient(X, y, w):
     return 2 * np.dot(X.T, (np.dot(X, w) - y)) / len(y)
+
 
 def SGD(X, y, h, λ, batch_size=20, learning_rate_schedule=None, max_iter=1000):
     w = np.zeros(X.shape[1])  # инициализировать веса
@@ -33,6 +38,7 @@ def SGD(X, y, h, λ, batch_size=20, learning_rate_schedule=None, max_iter=1000):
 
     return w
 
+
 def step_decay_schedule(initial_lr=0.1, decay_factor=0.5, step_size=10):
 
     def schedule(epoch):
@@ -40,9 +46,11 @@ def step_decay_schedule(initial_lr=0.1, decay_factor=0.5, step_size=10):
 
     return schedule
 
+
 def generate_data(n_samples=100, n_features=5, noise=0.1):
     X, y = make_regression(n_samples=n_samples, n_features=n_features, noise=noise)
     return X, y
+
 
 if __name__ == '__main__':
     X, y = generate_data()
@@ -104,3 +112,9 @@ if __name__ == '__main__':
         print(f"Memory used by {optimizer.get_config()['name']}: ", max(end_mem) - max(start_mem), "MB")
         print(f"Time taken by {optimizer.get_config()['name']}: ", end_time - start_time, "seconds")
         print(f"Weights from {optimizer.get_config()['name']}:", model.get_weights()[0].flatten())
+
+    # Рисуем график с линиями уровня
+    plotting.plot_contour_sns(X, y)
+
+
+
