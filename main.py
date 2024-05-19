@@ -85,12 +85,22 @@ if __name__ == '__main__':
         tf.keras.layers.Dense(1)
     ])
 
-    model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=h), loss='mean_squared_error')
-    start_mem = memory_usage(-1, interval=1, timeout=1)
-    start_time = time.time()
-    model.fit(X, y, epochs=1000, verbose=0)
-    end_time = time.time()
-    end_mem = memory_usage(-1, interval=1, timeout=1)
-    print("Memory used by TensorFlow SGD: ", max(end_mem) - max(start_mem), "MB")
-    print("Time taken by TensorFlow SGD: ", end_time - start_time, "seconds")
-    print("Weights from TensorFlow SGD:", model.get_weights()[0].flatten())
+    optimizers = [
+        tf.keras.optimizers.SGD(learning_rate=h),
+        tf.keras.optimizers.SGD(learning_rate=h, momentum=0.9),
+        tf.keras.optimizers.SGD(learning_rate=h, momentum=0.9, nesterov=True),
+        tf.keras.optimizers.Adagrad(learning_rate=h),
+        tf.keras.optimizers.RMSprop(learning_rate=h),
+        tf.keras.optimizers.Adam(learning_rate=h)
+    ]
+
+    for optimizer in optimizers:
+        model.compile(optimizer=optimizer, loss='mean_squared_error')
+        start_mem = memory_usage(-1, interval=1, timeout=1)
+        start_time = time.time()
+        model.fit(X, y, epochs=1000, verbose=0)
+        end_time = time.time()
+        end_mem = memory_usage(-1, interval=1, timeout=1)
+        print(f"Memory used by {optimizer.get_config()['name']}: ", max(end_mem) - max(start_mem), "MB")
+        print(f"Time taken by {optimizer.get_config()['name']}: ", end_time - start_time, "seconds")
+        print(f"Weights from {optimizer.get_config()['name']}:", model.get_weights()[0].flatten())
