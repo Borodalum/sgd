@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 def plot_contour_sns(X, y):
     # Создаем DataFrame из данных
     data = pd.DataFrame(data=np.c_[X[:, :2], y], columns=['Feature 1', 'Feature 2', 'Target'])
