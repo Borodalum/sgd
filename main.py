@@ -3,6 +3,7 @@ from sklearn.datasets import make_regression
 import numpy as np
 from memory_profiler import memory_usage
 import time
+import pandas as pd
 
 import plotting
 
@@ -56,6 +57,8 @@ if __name__ == '__main__':
     h = 0.01
     lambda_val = 0.5
 
+    df = pd.DataFrame(columns=['Method', 'Memory Used', 'Time Taken', 'Weights'])
+
     # Использование вашей функции SGD
     start_mem = memory_usage(-1, interval=1, timeout=1)
     start_time = time.time()
@@ -65,6 +68,7 @@ if __name__ == '__main__':
     print("Memory used by custom SGD: ", max(end_mem) - max(start_mem), "MB")
     print("Time taken by custom SGD: ", end_time - start_time, "seconds")
     print("Weights from custom SGD:", w)
+    df.loc[0] = ['Custom SGD', max(end_mem) - max(start_mem), end_time - start_time, w]
 
     # Использование нашей функции с другим batch_size
     start_mem = memory_usage(-1, interval=1, timeout=1)
@@ -75,6 +79,7 @@ if __name__ == '__main__':
     print("Memory used by custom SGD with batch_size=2: ", max(end_mem) - max(start_mem), "MB")
     print("Time taken by custom SGD with batch_size=2: ", end_time - start_time, "seconds")
     print("Weights from custom SGD with batch_size=2:", w)
+    df.loc[1] = ['Custom SGD with batch_size=2', max(end_mem) - max(start_mem), end_time - start_time, w]
 
     # Использование нашей функции с learning rate schedule
     step_schedule = step_decay_schedule(initial_lr=0.1, decay_factor=0.5, step_size=10)
@@ -86,6 +91,7 @@ if __name__ == '__main__':
     print("Memory used by custom SGD with step decay learning rate schedule: ", max(end_mem) - max(start_mem), "MB")
     print("Time taken by custom SGD with step decay learning rate schedule: ", end_time - start_time, "seconds")
     print("Weights from custom SGD with step decay learning rate schedule:", w)
+    df.loc[2] = ['Custom SGD with step decay learning rate schedule', max(end_mem) - max(start_mem), end_time - start_time, w]
 
     # Использование SGD из TensorFlow
     model = tf.keras.models.Sequential([
@@ -111,6 +117,13 @@ if __name__ == '__main__':
         print(f"Memory used by {optimizer.get_config()['name']}: ", max(end_mem) - max(start_mem), "MB")
         print(f"Time taken by {optimizer.get_config()['name']}: ", end_time - start_time, "seconds")
         print(f"Weights from {optimizer.get_config()['name']}:", model.get_weights()[0].flatten())
+        df.loc[len(df)] = [optimizer.get_config()['name'], max(end_mem) - max(start_mem), end_time - start_time, model.get_weights()[0].flatten()]
 
     # Рисуем график с линиями уровня
-    plotting.plot_contour_sns(X, y)
+    plotting.plot_contour_sns(X, y, w)
+
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', None)
+    print(df)
